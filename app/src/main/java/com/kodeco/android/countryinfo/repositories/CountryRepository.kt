@@ -6,7 +6,7 @@ import kotlinx.coroutines.flow.Flow
 interface CountryRepository {
     val countries: Flow<List<Country>>
 
-    suspend fun fetchCountries()
+    suspend fun fetchCountries(useRoom: Boolean)
     fun getCountry(index: Int): Country?
     suspend fun favorite(country: Country)
 }

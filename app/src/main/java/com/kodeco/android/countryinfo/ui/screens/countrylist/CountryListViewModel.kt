@@ -21,6 +21,9 @@ class CountryListViewModel @Inject constructor(
 
     val uiState: StateFlow<CountryListState> = _uiState.asStateFlow()
 
+    private val _useRoom = MutableStateFlow<Boolean>(false)
+    val useRoom : StateFlow<Boolean> = _useRoom.asStateFlow()
+
     init {
         viewModelScope.launch {
             repository
@@ -33,15 +36,15 @@ class CountryListViewModel @Inject constructor(
                 }
         }
 
-        fetchCountries()
+        fetchCountries(useRoom.value)
     }
 
-    fun fetchCountries() {
+    fun fetchCountries(useRoom: Boolean) {
         _uiState.value = CountryListState.Loading
 
         viewModelScope.launch {
             try {
-                repository.fetchCountries()
+                repository.fetchCountries(useRoom)
             } catch (e: Exception) {
                 _uiState.value = CountryListState.Error(e)
             }
@@ -52,5 +55,9 @@ class CountryListViewModel @Inject constructor(
         viewModelScope.launch {
             repository.favorite(country)
         }
+    }
+
+    fun setUseRoom(use: Boolean) {
+        _useRoom.value = use
     }
 }

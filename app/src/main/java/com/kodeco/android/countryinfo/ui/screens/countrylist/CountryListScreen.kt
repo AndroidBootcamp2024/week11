@@ -8,7 +8,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Help
-import androidx.compose.material.icons.automirrored.filled.VolumeMute
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
@@ -38,8 +38,12 @@ fun CountryListScreen(
     viewModel: CountryListViewModel,
     onCountryRowTap: (countryIndex: Int) -> Unit,
     onAboutTap: () -> Unit,
+    onSettingsTap: () -> Unit,
+    useRoom: Boolean,
+    favoriteFeature: Boolean
 ) {
     val state by viewModel.uiState.collectAsState()
+    viewModel.setUseRoom(useRoom)
 
     Scaffold(
         topBar = {
@@ -47,12 +51,20 @@ fun CountryListScreen(
                 title = { Text(text = stringResource(id = R.string.country_info_screen_title)) },
                 actions = {
                     IconButton(
+                        onClick = onSettingsTap,
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Settings,
+                            contentDescription = stringResource(id = R.string.settings),
+                        )
+                    }
+                    IconButton(
                         onClick = onAboutTap,
                     ) {
-                            Icon(
-                                imageVector = Icons.AutoMirrored.Filled.Help,
-                                contentDescription = stringResource(id = R.string.about_content_description),
-                            )
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.Help,
+                            contentDescription = stringResource(id = R.string.about_content_description),
+                        )
                     }
                 }
             )
@@ -72,14 +84,15 @@ fun CountryListScreen(
                 is CountryListState.Loading -> Loading()
                 is CountryListState.Success -> CountryInfoList(
                     countries = state.countries,
-                    onRefreshTap = viewModel::fetchCountries,
+                    onRefreshTap = { viewModel.fetchCountries(useRoom) },
                     onCountryRowTap = onCountryRowTap,
                     onCountryRowFavorite = viewModel::favorite,
+                    favoriteFeature = favoriteFeature
                 )
                 is CountryListState.Error -> Error(
                     userFriendlyMessageText = stringResource(id = R.string.country_info_error),
                     error = state.error,
-                    onRetry = viewModel::fetchCountries,
+                    onRetry = { viewModel.fetchCountries(useRoom) },
                 )
             }
         }
@@ -95,14 +108,17 @@ fun CountryInfoScreenPreview() {
                 override val countries: Flow<List<Country>>
                     get() = MutableStateFlow(sampleCountries).asStateFlow()
 
-                override suspend fun fetchCountries() {}
+                override suspend fun fetchCountries(useRoom: Boolean) {}
 
                 override fun getCountry(index: Int): Country = sampleCountry
 
                 override suspend fun favorite(country: Country) {}
-            },
+            }
         ),
         onCountryRowTap = {},
         onAboutTap = {},
+        onSettingsTap = {},
+        useRoom = false,
+        favoriteFeature = false
     )
 }

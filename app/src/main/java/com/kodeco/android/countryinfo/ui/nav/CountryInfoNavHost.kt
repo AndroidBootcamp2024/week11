@@ -1,6 +1,11 @@
 package com.kodeco.android.countryinfo.ui.nav
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -11,10 +16,14 @@ import com.kodeco.android.countryinfo.ui.screens.Screen
 import com.kodeco.android.countryinfo.ui.screens.about.AboutScreen
 import com.kodeco.android.countryinfo.ui.screens.countrydetails.CountryDetailsScreen
 import com.kodeco.android.countryinfo.ui.screens.countrylist.CountryListScreen
+import com.kodeco.android.countryinfo.ui.screens.settings.SettingsScreen
 
 @Composable
 fun CountryInfoNavHost() {
     val navController = rememberNavController()
+    var localStorage by remember { mutableStateOf(false) }
+    var favoriteFeature by remember { mutableStateOf(false)}
+    var screenRotation by remember { mutableStateOf(false)}
 
     NavHost(navController = navController, startDestination = Screen.List.path) {
         composable(Screen.List.path) {
@@ -24,6 +33,9 @@ fun CountryInfoNavHost() {
                     navController.navigate("${Screen.Details.path}/$countryIndex")
                 },
                 onAboutTap = { navController.navigate(Screen.About.path) },
+                onSettingsTap = { navController.navigate(Screen.Settings.path)},
+                useRoom = localStorage,
+                favoriteFeature = favoriteFeature
             )
         }
 
@@ -42,6 +54,17 @@ fun CountryInfoNavHost() {
         composable(Screen.About.path) {
             AboutScreen(
                 onNavigateUp = { navController.navigateUp() },
+            )
+        }
+
+        composable(Screen.Settings.path) {
+            SettingsScreen(
+                localStorage = localStorage,
+                favoriteFeature = favoriteFeature,
+                screenRotation = screenRotation,
+                onLocalStorageChange = { localStorage = !localStorage },
+                onFavoritesFeatureChange = { favoriteFeature = !favoriteFeature},
+                onScreenRotationChange = { screenRotation = !screenRotation}
             )
         }
     }
